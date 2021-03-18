@@ -7,6 +7,8 @@ module CustomElement exposing
     , toMain
     )
 
+-- {{{ IMPORTS
+
 import Browser
 import Html exposing (Html)
 import Html.Attributes
@@ -14,6 +16,11 @@ import Json.Decode exposing (Decoder)
 import Json.Encode exposing (Value)
 import String.Extra
 import String.Interpolate exposing (interpolate)
+
+
+
+-- }}}
+-- {{{ CUSTOM ELEMENT
 
 
 type CustomElement data model msg
@@ -44,7 +51,8 @@ from config =
 
 
 
--- USED IN APP
+-- }}}
+-- {{{ TO HTML
 
 
 toHtml : CustomElement data model elMsg -> data -> Html msg
@@ -55,7 +63,8 @@ toHtml (CustomElement config) data =
 
 
 
--- USED IN COMPONENT
+-- }}}
+-- {{{ TO MAIN
 
 
 type Model data model
@@ -164,7 +173,8 @@ toMain { customElement, elmDataChanged } =
 
 
 
--- BOILERPLATE
+-- }}}
+-- {{{ TO JAVASCRIPT
 
 
 toJavascript : CustomElement data model msg -> String
@@ -212,3 +222,7 @@ customElements.define("{0}", class extends HTMLElement {
             |> String.Extra.camelize
             |> String.Extra.toTitleCase
         ]
+
+
+
+-- }}}

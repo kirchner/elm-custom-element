@@ -1,10 +1,17 @@
 port module Square exposing (javascript, main, square)
 
+-- {{{ IMPORTS
+
 import CustomElement exposing (CustomElement, ElementProgram)
 import Html exposing (Html)
 import Html.Attributes
 import Json.Decode exposing (Decoder)
 import Json.Encode exposing (Value)
+
+
+
+-- }}}
+-- {{{ BOILERPLATE
 
 
 port elmDataChanged : (Value -> msg) -> Sub msg
@@ -39,7 +46,8 @@ javascript =
 
 
 
--- IMPLEMENTATION
+-- }}}
+-- {{{ IMPLEMENTATION
 
 
 customElement : CustomElement Data () ()
@@ -96,3 +104,7 @@ encode data =
 decoder : Decoder Data
 decoder =
     Json.Decode.map Data (Json.Decode.field "isGreen" Json.Decode.bool)
+
+
+
+-- }}}
