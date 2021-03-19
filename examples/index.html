@@ -16,10 +16,11 @@
                 }
 
                 connectedCallback() {
+                    const that = this;
                     window.requestAnimationFrame(function() {
-                        this._app = Elm.Square.init({
-                            node: this,
-                            flags: this.elmData,
+                        that._app = Elm.Square.init({
+                            node: that,
+                            flags: that.elmData,
                         });
                     });
                 }
@@ -53,10 +54,11 @@
                 }
 
                 connectedCallback() {
+                    const that = this;
                     window.requestAnimationFrame(function() {
-                        this._app = Elm.Container.init({
-                            node: this,
-                            flags: this.elmData,
+                        that._app = Elm.Container.init({
+                            node: that,
+                            flags: that.elmData,
                         });
                     });
                 }
