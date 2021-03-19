@@ -21,14 +21,12 @@ main =
 
 type alias Model =
     { isGreen : Bool
-    , containerContentVisible : Bool
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { isGreen = False
-      , containerContentVisible = False
       }
     , Cmd.none
     )
@@ -36,7 +34,6 @@ init _ =
 
 type Msg
     = UserSwitched
-    | RenderedFrame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -47,23 +44,14 @@ update msg model =
             , Cmd.none
             )
 
-        RenderedFrame ->
-            ( { model | containerContentVisible = True }
-            , Cmd.none
-            )
-
 
 subscriptions : Model -> Sub Msg
-subscriptions { containerContentVisible } =
-    if containerContentVisible then
-        Sub.none
-
-    else
-        Browser.Events.onAnimationFrame (\_ -> RenderedFrame)
+subscriptions _ =
+    Sub.none
 
 
 view : Model -> Html Msg
-view { isGreen, containerContentVisible } =
+view { isGreen } =
     Html.div []
         [ Html.div []
             [ Html.div []
@@ -76,13 +64,13 @@ view { isGreen, containerContentVisible } =
                 [ Html.text "Switch!" ]
             ]
         , container
-            (if containerContentVisible then
-                [ Html.p
-                    [ Html.Attributes.style "background-color" "yellow" ]
-                    [ Html.text "Inside custom element container" ]
+            [ Html.p
+                [ Html.Attributes.style "background-color" "yellow" ]
+                [ Html.text "Inside custom element container" ]
+            , Html.ul []
+                [ Html.li [] [ Html.text "Item 1" ]
+                , Html.li [] [ Html.text "Item 2" ]
+                , Html.li [] [ Html.text "Item 3" ]
                 ]
-
-             else
-                []
-            )
+            ]
         ]

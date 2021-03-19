@@ -51,6 +51,16 @@
                 }
 
                 connectedCallback() {
+                    const observer = new MutationObserver(function(mutations, observer) {
+                        mutations.forEach(function (mutation) {
+                            mutation.removedNodes.forEach(function(removedNode) {
+                                mutation.target.appendChild(removedNode);
+                            });
+                        });
+                        observer.disconnect();
+                    });
+                    observer.observe(this, { childList: true });
+
                     this._app = Elm.Container.init({
                         node: this,
                         flags: this.elmData,
