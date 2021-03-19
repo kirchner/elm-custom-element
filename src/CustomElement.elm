@@ -1,6 +1,7 @@
 module CustomElement exposing
     ( CustomElement
     , ElementProgram
+    , HtmlDetails
     , from
     , toHtml
     , toJavascript
@@ -10,7 +11,7 @@ module CustomElement exposing
 -- {{{ IMPORTS
 
 import Browser
-import Html exposing (Html)
+import Html exposing (Attribute, Html)
 import Html.Attributes
 import Json.Decode exposing (Decoder)
 import Json.Encode exposing (Value)
@@ -28,19 +29,29 @@ type CustomElement data model msg
         { init : data -> ( model, Cmd msg )
         , update : data -> msg -> model -> ( model, Cmd msg )
         , subscriptions : data -> model -> Sub msg
-        , view : data -> model -> Html msg
-        , name : String
+        , view : data -> model -> HtmlDetails msg
+        , nameNode : String
+        , nameModule : String
+        , namePort : String
         , encode : data -> Value
         , decoder : Decoder data
         }
 
 
+type alias HtmlDetails msg =
+    { attributes : List (Attribute msg)
+    , children : List (Html msg)
+    }
+
+
 from :
     { init : data -> ( model, Cmd msg )
     , update : data -> msg -> model -> ( model, Cmd msg )
-    , view : data -> model -> Html msg
+    , view : data -> model -> HtmlDetails msg
     , subscriptions : data -> model -> Sub msg
-    , name : String
+    , nameNode : String
+    , nameModule : String
+    , namePort : String
     , encode : data -> Value
     , decoder : Decoder data
     }
@@ -57,7 +68,7 @@ from config =
 
 toHtml : CustomElement data model elMsg -> data -> Html msg
 toHtml (CustomElement config) data =
-    Html.node config.name
+    Html.node config.nameNode
         [ Html.Attributes.property "elmData" (config.encode data) ]
         []
 
@@ -159,7 +170,13 @@ toMain { customElement, elmDataChanged } =
         view wrapped =
             case wrapped of
                 Running { model, data } ->
-                    Html.map ElMsg (config.view data model)
+                    let
+                        { attributes, children } =
+                            config.view data model
+                    in
+                    Html.node config.nameNode
+                        (List.map (Html.Attributes.map ElMsg) attributes)
+                        (List.map (Html.map ElMsg) children)
 
                 Failed _ ->
                     Html.text "Could not initialize custom element"
@@ -192,13 +209,8 @@ customElements.define("{0}", class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.style.display = "contains";
-
-        this._container = document.createElement("div");
-        this.attachChild(this._container);
-
         this._app = Elm.{1}.init({
-            node: this._container,
+            node: this,
             flags: this.elmData,
         });
     }
@@ -208,19 +220,19 @@ customElements.define("{0}", class extends HTMLElement {
 
     set elmData(value) {
         this._elmData = value;
-        if (!this._app) return;
-        this._app.ports.elmDataChanged.send(value);
+        if (this._app) {
+            this._app.ports.{2}.send(value);
+        }
     }
 
     get elmData() {
-        return this._meta
+        return this._elmData
     }
 });
 """
-        [ config.name
-        , config.name
-            |> String.Extra.camelize
-            |> String.Extra.toTitleCase
+        [ config.nameNode
+        , config.nameModule
+        , config.namePort
         ]
 
 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="main.js"></script>
+
+        <!-- GENERATED BOILERPLATE  -->
+        <script>
+            customElements.define("my-square", class extends HTMLElement {
+                constructor() {
+                    super();
+                    this._elmData = null;
+                    this._app = null;
+                }
+            
+                adoptedCallback() {
+                }
+            
+                connectedCallback() {
+                    this._app = Elm.Square.init({
+                        node: this,
+                        flags: this.elmData,
+                    });
+                }
+            
+                disconnectedCallback() {
+                }
+            
+                set elmData(value) {
+                    this._elmData = value;
+                    if (this._app) {
+                        this._app.ports.elmDataChanged.send(value);
+                    }
+                }
+            
+                get elmData() {
+                    return this._elmData
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <main></main>
+        <script>
+            var app = Elm.Main.init({
+                node: document.querySelector("main"),
+                flags: null,
+            });
+        </script>
+    </body>
+</html>

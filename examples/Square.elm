@@ -2,7 +2,7 @@ port module Square exposing (javascript, main, square)
 
 -- {{{ IMPORTS
 
-import CustomElement exposing (CustomElement, ElementProgram)
+import CustomElement exposing (CustomElement, ElementProgram, HtmlDetails)
 import Html exposing (Html)
 import Html.Attributes
 import Json.Decode exposing (Decoder)
@@ -57,7 +57,9 @@ customElement =
         , update = update
         , subscriptions = subscriptions
         , view = view
-        , name = "my-square"
+        , nameNode = "my-square"
+        , nameModule = "Square"
+        , namePort = "elmDataChanged"
         , encode = encode
         , decoder = decoder
         }
@@ -78,9 +80,9 @@ subscriptions _ _ =
     Sub.none
 
 
-view : Data -> () -> Html ()
+view : Data -> () -> HtmlDetails msg
 view { isGreen } _ =
-    Html.div
+    { attributes =
         [ Html.Attributes.style "display" "inline-block"
         , Html.Attributes.style "width" "200px"
         , Html.Attributes.style "height" "200px"
@@ -92,7 +94,8 @@ view { isGreen } _ =
                 "blue"
             )
         ]
-        []
+    , children = []
+    }
 
 
 encode : Data -> Value
