@@ -2,7 +2,8 @@ module CustomElement exposing
     ( CustomElement
     , ElementProgram
     , HtmlDetails
-    , from
+    , container
+    , element
     , toHtml
     , toJavascript
     , toMain
@@ -24,12 +25,13 @@ import String.Interpolate exposing (interpolate)
 -- {{{ CUSTOM ELEMENT
 
 
-type CustomElement data model msg
+type CustomElement data model elMsg msg
     = CustomElement
-        { init : data -> ( model, Cmd msg )
-        , update : data -> msg -> model -> ( model, Cmd msg )
-        , subscriptions : data -> model -> Sub msg
-        , view : data -> model -> HtmlDetails msg
+        { init : data -> ( model, Cmd elMsg )
+        , update : data -> elMsg -> model -> ( model, Cmd elMsg )
+        , subscriptions : data -> model -> Sub elMsg
+        , view : data -> model -> HtmlDetails elMsg
+        , viewChild : HtmlDetails msg -> List (Html msg)
         , nameNode : String
         , nameModule : String
         , namePort : String
@@ -44,21 +46,67 @@ type alias HtmlDetails msg =
     }
 
 
-from :
+element :
     { init : data -> ( model, Cmd msg )
     , update : data -> msg -> model -> ( model, Cmd msg )
-    , view : data -> model -> HtmlDetails msg
     , subscriptions : data -> model -> Sub msg
+    , view : data -> model -> HtmlDetails msg
     , nameNode : String
     , nameModule : String
     , namePort : String
     , encode : data -> Value
     , decoder : Decoder data
     }
-    -> CustomElement data model msg
-from config =
+    -> CustomElement data model msg Never
+element config =
     CustomElement
-        config
+        { init = config.init
+        , update = config.update
+        , view = config.view
+        , viewChild = \_ -> []
+        , subscriptions = config.subscriptions
+        , nameNode = config.nameNode
+        , nameModule = config.nameModule
+        , namePort = config.namePort
+        , encode = config.encode
+        , decoder = config.decoder
+        }
+
+
+container :
+    { init : data -> ( model, Cmd elMsg )
+    , update : data -> elMsg -> model -> ( model, Cmd elMsg )
+    , subscriptions : data -> model -> Sub elMsg
+    , attributes : data -> model -> List (Attribute elMsg)
+    , child : String
+    , nameNode : String
+    , nameModule : String
+    , namePort : String
+    , encode : data -> Value
+    , decoder : Decoder data
+    }
+    -> CustomElement data model elMsg msg
+container config =
+    let
+        view data model =
+            { attributes = config.attributes data model
+            , children = [ Html.node config.child [] [] ]
+            }
+    in
+    CustomElement
+        { init = config.init
+        , update = config.update
+        , view = view
+        , viewChild =
+            \{ attributes, children } ->
+                [ Html.node config.child attributes children ]
+        , subscriptions = config.subscriptions
+        , nameNode = config.nameNode
+        , nameModule = config.nameModule
+        , namePort = config.namePort
+        , encode = config.encode
+        , decoder = config.decoder
+        }
 
 
 
@@ -66,11 +114,15 @@ from config =
 -- {{{ TO HTML
 
 
-toHtml : CustomElement data model elMsg -> data -> Html msg
-toHtml (CustomElement config) data =
+toHtml :
+    CustomElement data model elMsg msg
+    -> data
+    -> HtmlDetails msg
+    -> Html msg
+toHtml (CustomElement config) data details =
     Html.node config.nameNode
         [ Html.Attributes.property "elmData" (config.encode data) ]
-        []
+        (config.viewChild details)
 
 
 
@@ -96,10 +148,10 @@ type alias ElementProgram data model msg =
 
 
 toMain :
-    { customElement : CustomElement data model msg
-    , elmDataChanged : (Value -> Msg msg) -> Sub (Msg msg)
+    { customElement : CustomElement data model elMsg msg
+    , elmDataChanged : (Value -> Msg elMsg) -> Sub (Msg elMsg)
     }
-    -> ElementProgram data model msg
+    -> ElementProgram data model elMsg
 toMain { customElement, elmDataChanged } =
     let
         (CustomElement config) =
@@ -194,7 +246,7 @@ toMain { customElement, elmDataChanged } =
 -- {{{ TO JAVASCRIPT
 
 
-toJavascript : CustomElement data model msg -> String
+toJavascript : CustomElement data model elMsg msg -> String
 toJavascript (CustomElement config) =
     interpolate
         """
@@ -209,9 +261,11 @@ customElements.define("{0}", class extends HTMLElement {
     }
 
     connectedCallback() {
-        this._app = Elm.{1}.init({
-            node: this,
-            flags: this.elmData,
+        window.requestAnimationFrame(function() {
+            this._app = Elm.{1}.init({
+                node: this,
+                flags: this.elmData,
+            });
         });
     }
 

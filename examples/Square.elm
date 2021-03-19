@@ -23,9 +23,13 @@ type alias Data =
 
 {-| Use this in your application.
 -}
-square : Data -> Html msg
+square : Data -> Html Never
 square data =
-    CustomElement.toHtml customElement data
+    CustomElement.toHtml customElement
+        data
+        { attributes = []
+        , children = []
+        }
 
 
 {-| Used by generated Javascript.
@@ -50,9 +54,9 @@ javascript =
 -- {{{ IMPLEMENTATION
 
 
-customElement : CustomElement Data () ()
+customElement : CustomElement Data () () Never
 customElement =
-    CustomElement.from
+    CustomElement.element
         { init = init
         , update = update
         , subscriptions = subscriptions

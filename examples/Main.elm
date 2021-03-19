@@ -1,7 +1,9 @@
 module Main exposing (main)
 
 import Browser
+import Container exposing (container)
 import Html exposing (Html)
+import Html.Attributes
 import Html.Events
 import Square exposing (square)
 
@@ -30,11 +32,19 @@ view : Bool -> Html Msg
 view isGreen =
     Html.div []
         [ Html.div []
-            [ square { isGreen = isGreen }
-            , Html.text " "
-            , square { isGreen = not isGreen }
+            [ Html.div []
+                [ Html.map never (square { isGreen = isGreen })
+                , Html.text " "
+                , Html.map never (square { isGreen = not isGreen })
+                ]
+            , Html.button
+                [ Html.Events.onClick UserSwitched ]
+                [ Html.text "Switch!" ]
             ]
-        , Html.button
-            [ Html.Events.onClick UserSwitched ]
-            [ Html.text "Switch!" ]
+        , container
+            { attributes =
+                [ Html.Attributes.style "background-color" "yellow" ]
+            , children =
+                [ Html.text "Inside custom element container" ]
+            }
         ]

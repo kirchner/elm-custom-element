@@ -11,27 +11,66 @@
                     this._elmData = null;
                     this._app = null;
                 }
-            
+
                 adoptedCallback() {
                 }
-            
+
                 connectedCallback() {
-                    this._app = Elm.Square.init({
-                        node: this,
-                        flags: this.elmData,
+                    window.requestAnimationFrame(function() {
+                        this._app = Elm.Square.init({
+                            node: this,
+                            flags: this.elmData,
+                        });
                     });
                 }
-            
+
                 disconnectedCallback() {
                 }
-            
+
                 set elmData(value) {
                     this._elmData = value;
                     if (this._app) {
                         this._app.ports.elmDataChanged.send(value);
                     }
                 }
-            
+
+                get elmData() {
+                    return this._elmData
+                }
+            });
+        </script>
+
+        <!-- GENERATED BOILERPLATE  -->
+        <script>
+            customElements.define("my-container", class extends HTMLElement {
+                constructor() {
+                    super();
+                    this._elmData = null;
+                    this._app = null;
+                }
+
+                adoptedCallback() {
+                }
+
+                connectedCallback() {
+                    window.requestAnimationFrame(function() {
+                        this._app = Elm.Container.init({
+                            node: this,
+                            flags: this.elmData,
+                        });
+                    });
+                }
+
+                disconnectedCallback() {
+                }
+
+                set elmData(value) {
+                    this._elmData = value;
+                    if (this._app) {
+                        this._app.ports.containerDataChanged.send(value);
+                    }
+                }
+
                 get elmData() {
                     return this._elmData
                 }
