@@ -19,9 +19,9 @@ port containerDataChanged : (Value -> msg) -> Sub msg
 
 {-| Use this in your application.
 -}
-container : HtmlDetails msg -> Html msg
-container details =
-    CustomElement.toHtml customElement () details
+container : List (Html msg) -> Html msg
+container children =
+    CustomElement.toHtml customElement () children
 
 
 {-| Used by generated Javascript.
@@ -53,7 +53,6 @@ customElement =
         , update = update
         , subscriptions = subscriptions
         , attributes = attributes
-        , child = "p"
         , nameNode = "my-container"
         , nameModule = "Container"
         , namePort = "containerDataChanged"
@@ -79,7 +78,7 @@ subscriptions _ _ =
 
 attributes : () -> () -> List (Attribute ())
 attributes _ _ =
-    []
+    [ Html.Attributes.style "display" "inline-block" ]
 
 
 encode : () -> Value

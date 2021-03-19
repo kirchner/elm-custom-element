@@ -25,11 +25,7 @@ type alias Data =
 -}
 square : Data -> Html Never
 square data =
-    CustomElement.toHtml customElement
-        data
-        { attributes = []
-        , children = []
-        }
+    CustomElement.toHtml customElement data []
 
 
 {-| Used by generated Javascript.

@@ -16,12 +16,9 @@
                 }
 
                 connectedCallback() {
-                    const that = this;
-                    window.requestAnimationFrame(function() {
-                        that._app = Elm.Square.init({
-                            node: that,
-                            flags: that.elmData,
-                        });
+                    this._app = Elm.Square.init({
+                        node: this,
+                        flags: this.elmData,
                     });
                 }
 
@@ -54,12 +51,9 @@
                 }
 
                 connectedCallback() {
-                    const that = this;
-                    window.requestAnimationFrame(function() {
-                        that._app = Elm.Container.init({
-                            node: that,
-                            flags: that.elmData,
-                        });
+                    this._app = Elm.Container.init({
+                        node: this,
+                        flags: this.elmData,
                     });
                 }
 

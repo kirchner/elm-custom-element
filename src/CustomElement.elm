@@ -31,7 +31,6 @@ type CustomElement data model elMsg msg
         , update : data -> elMsg -> model -> ( model, Cmd elMsg )
         , subscriptions : data -> model -> Sub elMsg
         , view : data -> model -> HtmlDetails elMsg
-        , viewChild : HtmlDetails msg -> List (Html msg)
         , nameNode : String
         , nameModule : String
         , namePort : String
@@ -63,7 +62,6 @@ element config =
         { init = config.init
         , update = config.update
         , view = config.view
-        , viewChild = \_ -> []
         , subscriptions = config.subscriptions
         , nameNode = config.nameNode
         , nameModule = config.nameModule
@@ -78,7 +76,6 @@ container :
     , update : data -> elMsg -> model -> ( model, Cmd elMsg )
     , subscriptions : data -> model -> Sub elMsg
     , attributes : data -> model -> List (Attribute elMsg)
-    , child : String
     , nameNode : String
     , nameModule : String
     , namePort : String
@@ -90,16 +87,13 @@ container config =
     let
         view data model =
             { attributes = config.attributes data model
-            , children = [ Html.node config.child [] [] ]
+            , children = []
             }
     in
     CustomElement
         { init = config.init
         , update = config.update
         , view = view
-        , viewChild =
-            \{ attributes, children } ->
-                [ Html.node config.child attributes children ]
         , subscriptions = config.subscriptions
         , nameNode = config.nameNode
         , nameModule = config.nameModule
@@ -117,12 +111,12 @@ container config =
 toHtml :
     CustomElement data model elMsg msg
     -> data
-    -> HtmlDetails msg
+    -> List (Html msg)
     -> Html msg
-toHtml (CustomElement config) data details =
+toHtml (CustomElement config) data children =
     Html.node config.nameNode
         [ Html.Attributes.property "elmData" (config.encode data) ]
-        (config.viewChild details)
+        children
 
 
 
